@@ -15,8 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to use for release (e.g., v5.1.0)'
+        description: 'Tag to use for release (e.g., v6.0.2)'
         required: true
+        default: 'v6.0.2'
       ndk-version:
         description: 'NDK version to use (e.g., r25b)'
         required: false

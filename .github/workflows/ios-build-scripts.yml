@@ -18,7 +18,7 @@ on:
       tag:
         description: 'Tag to use for release (e.g., v6.0.2)'
         required: true
-        default: v6.0.2
+        default: 'v6.0.2'
       xcode:
         description: 'Xcode version to build with'
         required: true
