@@ -1,5 +1,5 @@
 name: ios build scripts - did
- 
+
 on:
   workflow_dispatch:
     inputs:
@@ -51,6 +51,6 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag }}
           files: |
-            dist/ffmpegkit-ios-xcode-${XCODE_VERSION}.zip
+            dist/ffmpegkit-ios-xcode-${{ github.event.inputs.xcode }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
