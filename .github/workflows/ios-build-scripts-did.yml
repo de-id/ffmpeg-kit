@@ -1,4 +1,4 @@
-name: ios build scripts - did
+name: ios build scripts
 
 on:
   workflow_dispatch:
