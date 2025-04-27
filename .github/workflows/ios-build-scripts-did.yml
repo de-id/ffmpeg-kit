@@ -44,13 +44,13 @@ jobs:
           mkdir -p dist
           cp -R prebuilt/bundle-apple-xcframework-ios/*.xcframework dist/
           cd dist
-          zip -r ffmpegkit-ios-xcode-${XCODE_VERSION}.zip *.xcframework
+          zip -r ffmpegkit-ios.zip *.xcframework
       - name: Create Release
         if: ${{ success() && github.event.inputs.tag != '' }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.tag }}
           files: |
-            dist/ffmpegkit-ios-xcode-${{ github.event.inputs.xcode }}.zip
+            dist/ffmpegkit-ios.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

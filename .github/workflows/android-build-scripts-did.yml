@@ -58,13 +58,13 @@ jobs:
         if: ${{ success() }}
         run: |
           cd prebuilt/bundle-android-aar
-          zip -r ffmpeg-kit-android-aar.zip ffmpeg-kit
+          zip -r ffmpeg-kit-android.zip ffmpeg-kit
       - name: Create Release
         if: ${{ success() && github.event.inputs.tag }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.tag }}
           files: |
-            prebuilt/bundle-android-aar/ffmpeg-kit-android-aar.zip
+            prebuilt/bundle-android-aar/ffmpeg-kit-android.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
