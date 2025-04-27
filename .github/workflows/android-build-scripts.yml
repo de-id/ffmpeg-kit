@@ -1,17 +1,6 @@
 name: android build scripts
 
 on:
-  push:
-    branches:
-      - development
-      - main
-    paths:
-      - '.github/workflows/android-build-scripts.yml'
-      - 'android/**'
-      - '!android/README.md'
-      - 'scripts/**'
-      - 'tools/**'
-      - 'android.sh'
   pull_request:
     branches:
       - development
@@ -23,14 +12,22 @@ on:
       - 'scripts/**'
       - 'tools/**'
       - 'android.sh'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for release (e.g., v5.1.0)'
+        required: true
+      ndk-version:
+        description: 'NDK version to use (e.g., r25b)'
+        required: false
+        default: 'r25c'
 
 jobs:
   build-main-on-linux:
     name: android main on linux
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        ndk-version: [ 'r22b-linux-x86_64', 'r23b-linux', 'r24-linux', 'r25b-linux' ]
+    env:
+      NDK_VERSION: ${{ github.event.inputs.ndk-version || 'r25c' }}
     defaults:
       run:
         shell: bash
@@ -45,7 +42,7 @@ jobs:
         run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --uninstall "cmake;3.10.2.4988404" "cmake;3.18.1"
       - name: set up android ndk
         run: |
-          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
+          curl -s "https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip" -o ndk.zip
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
       - name: run the build script
@@ -56,123 +53,17 @@ jobs:
       - name: print ffbuild logs
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
-  build-lts-on-linux:
-    name: android lts on linux
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        ndk-version: [ 'r22b-linux-x86_64', 'r23b-linux' ]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - name: set up adopt jdk 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-      - name: prerequisites
-        run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --uninstall "cmake;3.10.2.4988404" "cmake;3.18.1"
-      - name: set up android ndk
+      - name: Zip AAR
+        if: ${{ success() }}
         run: |
-          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
-          unzip -q -o ndk.zip -d .ndk
-          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
-      - name: run the build script
-        run: ./android.sh -d --lts --enable-android-media-codec --enable-android-zlib
-      - name: print build logs
-        if: ${{ always() }}
-        run: cat build.log
-      - name: print ffbuild logs
-        if: ${{ failure() }}
-        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
-  build-main-on-macos:
-    name: android main on macos
-    runs-on: macos-12
-    strategy:
-      matrix:
-        ndk-version: [ 'r22b-darwin-x86_64', 'r23b-darwin', 'r24-darwin', 'r25b-darwin' ]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - name: set up adopt jdk 17
-        uses: actions/setup-java@v3
+          cd prebuilt/bundle-android-aar
+          zip -r ffmpeg-kit-android-aar.zip ffmpeg-kit
+      - name: Create Release
+        if: ${{ success() && github.event.inputs.tag }}
+        uses: softprops/action-gh-release@v1
         with:
-          distribution: 'adopt'
-          java-version: '17'
-      - name: set up android ndk
-        run: |
-          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
-          unzip -q -o ndk.zip -d .ndk
-          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
-      - name: run the build script
-        run: ./android.sh -d --enable-android-media-codec --enable-android-zlib --disable-arm-v7a
-      - name: print build logs
-        if: ${{ always() }}
-        run: cat build.log
-      - name: print ffbuild logs
-        if: ${{ failure() }}
-        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
-  build-lts-on-macos:
-    name: android lts on macos
-    runs-on: macos-12
-    strategy:
-      matrix:
-        ndk-version: [ 'r22b-darwin-x86_64', 'r23b-darwin' ]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - name: set up adopt jdk 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-      - name: set up android ndk
-        run: |
-          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
-          unzip -q -o ndk.zip -d .ndk
-          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
-      - name: run the build script
-        run: ./android.sh -d --lts --enable-android-media-codec --enable-android-zlib
-      - name: print build logs
-        if: ${{ always() }}
-        run: cat build.log
-      - name: print ffbuild logs
-        if: ${{ failure() }}
-        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
-  build-main-without-ffmpeg-kit-protocols-on-linux:
-    name: build without ffmpeg-kit protocols
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        ndk-version: [ 'r22b-linux-x86_64' ]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v4
-      - name: set up adopt jdk 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
-      - name: prerequisites
-        run: ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --uninstall "cmake;3.10.2.4988404" "cmake;3.18.1"
-      - name: set up android ndk
-        run: |
-          curl -s "https://dl.google.com/android/repository/android-ndk-${{ matrix.ndk-version }}.zip" -o ndk.zip
-          unzip -q -o ndk.zip -d .ndk
-          echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
-      - name: run the build script
-        run: ./android.sh --no-ffmpeg-kit-protocols --disable-x86 --disable-x86-64 --disable-arm-v7a --disable-arm-v7a-neon
-      - name: print build logs
-        if: ${{ always() }}
-        run: cat build.log
-      - name: print ffbuild logs
-        if: ${{ failure() }}
-        run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
+          tag_name: ${{ github.event.inputs.tag }}
+          files: |
+            prebuilt/bundle-android-aar/ffmpeg-kit-android-aar.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
