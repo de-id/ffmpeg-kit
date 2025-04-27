@@ -1,4 +1,4 @@
-name: android build scripts
+name: android build scripts - did
 
 on:
   pull_request:
