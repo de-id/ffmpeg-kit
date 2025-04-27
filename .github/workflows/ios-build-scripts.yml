@@ -1,18 +1,6 @@
 name: ios build scripts
  
 on:
-  pull_request:
-    branches:
-      - development
-      - main
-    paths:
-      - '.github/workflows/ios-build-scripts.yml'
-      - 'apple/**'
-      - '!apple/README.md'
-      - 'scripts/**'
-      - 'tools/**'
-      - 'apple.sh'
-      - 'ios.sh'
   workflow_dispatch:
     inputs:
       tag:
