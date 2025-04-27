@@ -15,7 +15,7 @@ on:
 jobs:
   build-main-on-macos-sonoma:
     name: ios main on sonoma
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       XCODE_VERSION: ${{ github.event.inputs.xcode }}
     defaults:
