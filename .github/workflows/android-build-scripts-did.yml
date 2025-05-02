@@ -47,10 +47,18 @@ jobs:
           unzip -q -o ndk.zip -d .ndk
           echo "ANDROID_NDK_ROOT=$PWD/.ndk/$(ls .ndk)" >> $GITHUB_ENV
       - name: run the build script
-        run: ./android.sh -d --enable-android-media-codec --enable-android-zlib --disable-arm-v7a --disable-arm-v7a-neon --disable-x86 --disable-x86-64 --enable-gpl --enable-x264 --enable-libass --enable-libiconv 
+        run: |
+          ./android.sh -d --enable-android-media-codec --enable-android-zlib --disable-arm-v7a --disable-arm-v7a-neon \
+          --disable-x86 --disable-x86-64 --enable-gpl --enable-x264 --enable-libass --enable-libiconv
       - name: print build logs
         if: ${{ always() }}
         run: cat build.log
+      - name: Upload build.log as artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-log
+          path: build.log
       - name: print ffbuild logs
         if: ${{ failure() }}
         run: '[[ -f ./src/ffmpeg/ffbuild/config.log ]] && tail -50 ./src/ffmpeg/ffbuild/config.log'
