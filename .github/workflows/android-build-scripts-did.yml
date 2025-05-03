@@ -86,3 +86,9 @@ jobs:
             prebuilt/bundle-android-aar/ffmpeg-kit-android.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload the built binary as artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-kit-android.zip
+          path: prebuilt/bundle-android-aar/ffmpeg-kit-android.zip
