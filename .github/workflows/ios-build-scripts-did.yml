@@ -63,3 +63,9 @@ jobs:
             dist/ffmpeg-kit-ios.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload the built binary as artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-kit-ios.zip
+          path: dist/ffmpeg-kit-ios.zip
