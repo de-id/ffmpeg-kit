@@ -1,4 +1,6 @@
 name: linux build scripts
+permissions:
+  contents: read
 
 on:
   push:
