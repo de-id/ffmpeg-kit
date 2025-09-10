@@ -12,6 +12,8 @@ on:
         required: true
         default: '16.1'
 
+permissions:
+  contents: write
 jobs:
   build-main-on-macos-sonoma:
     name: ios main on sonoma

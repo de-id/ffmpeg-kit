@@ -1,4 +1,6 @@
 name: tvos build scripts
+permissions:
+  contents: read
 
 on:
   push:

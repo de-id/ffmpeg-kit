@@ -1,4 +1,6 @@
 name: android nightly builds
+permissions:
+  contents: read
 
 on:
   schedule:
