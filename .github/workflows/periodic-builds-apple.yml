@@ -1,4 +1,6 @@
 name: apple nightly builds
+permissions:
+  contents: read
 
 on:
   schedule:
